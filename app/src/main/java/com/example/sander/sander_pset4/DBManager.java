@@ -32,8 +32,6 @@ public class DBManager {
     }
 
     public void create(Todo todo) {
-        // open database
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         // insert values into database
         ContentValues contentValues = new ContentValues();
@@ -43,8 +41,6 @@ public class DBManager {
     }
 
     public ArrayList<Todo> read() {
-        // open database
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         // create arraylist we can fill with todos
         ArrayList<Todo> todos = new ArrayList<>();
@@ -63,9 +59,9 @@ public class DBManager {
             do {
 
                 // get needed data from current row
-                String text = cursor.getString(cursor.getColumnIndex("TEXT"));
-                int checked = cursor.getInt(cursor.getColumnIndex("CHECKED"));
-                int id = cursor.getInt(cursor.getColumnIndex("_ID"));
+                String text = cursor.getString(cursor.getColumnIndex(DBHelper.TEXT));
+                int checked = cursor.getInt(cursor.getColumnIndex(DBHelper.CHECKED));
+                int id = cursor.getInt(cursor.getColumnIndex(DBHelper._ID));
 
                 // create todo object from received data
                 Todo todo = new Todo(text, checked, id);
@@ -79,8 +75,6 @@ public class DBManager {
     }
 
     public int update(Todo todo) {
-        // open database
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         // update values and return exit code
         ContentValues contentValues = new ContentValues();
@@ -91,6 +85,8 @@ public class DBManager {
     }
 
     public void delete(Todo todo) {
+
+        // delete todo from database
         db.delete(DBHelper.TABLE, DBHelper._ID + " = ?",
                 new String[] {String.valueOf(todo.get_id())});
     }

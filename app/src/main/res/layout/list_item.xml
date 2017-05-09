@@ -5,14 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
-
     <TextView
+        android:id="@+id/listCheckedTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Todo item"
+        tools:text="Test item."
         />
 </LinearLayout>

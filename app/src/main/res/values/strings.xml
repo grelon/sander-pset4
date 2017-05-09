@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">sander-pset4</string>
+    <string name="mainTitle">My Todo List:</string>
+    <string name="add">add</string>
+    <string name="hint">Add your todo here</string>
+    <string name="init1">Welcome to your new todo list</string>
+    <string name="init2">Click to check an item</string>
+    <string name="init3">Long press to delete an item</string>
 </resources>

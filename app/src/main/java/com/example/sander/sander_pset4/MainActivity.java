@@ -22,8 +22,6 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<Todo> todoList;
     ArrayList<String> todoStrList;
-
-    TodoAdapter adapter;
     ArrayAdapter arrayAdapter;
 
     @Override
@@ -47,25 +45,15 @@ public class MainActivity extends AppCompatActivity {
     private void makeList() {
         Log.d("log", "Main.onCreate.makeList");
 
-        // fill array with todo items from database
-        todoList = db.read();
-
-        // fill string array list
-        todoStrList = new ArrayList<>();
-        for (int i = 0; i < todoList.size(); i++) {
-            todoStrList.add(i, todoList.get(i).getText());
-            Log.d("log", "todoList.get(" + i + ").getText():" + todoList.get(i).getText());
-        }
-
-        // initialize adapter
-        adapter = new TodoAdapter(this, todoList);
-        arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, todoList);
-
-        lvMain.setAdapter(arrayAdapter);
+        // set choicemode of list to multiple
         lvMain.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-//        // set listeners for listitems
-//        lvMain.setOnItemClickListener(new simpleListener());
+        // set up list
+        updateList();
+
+        // set listeners for listitems
+        lvMain.setOnItemClickListener(new simpleListener());
+        lvMain.setOnItemLongClickListener(new longListener());
 
         // testing: print content of todolist
         for (Todo todo : db.read()) {
@@ -77,18 +65,59 @@ public class MainActivity extends AppCompatActivity {
         Log.d("log", "Main.onCreate.makeList: success");
     }
 
-    private void reverseCheckState(Todo todo, TextView tvTodo) {
-        if (todo.getChecked() == 0) {
-            // check
-            todo.setChecked(1);
+
+    private void updateTodoStrList() {
+        // fill string array list with text of todo's
+        todoStrList = new ArrayList<>();
+        for (int i = 0; i < todoList.size(); i++) {
+            todoStrList.add(i, todoList.get(i).getText());
         }
-        else {
-            // uncheck
-            todo.setChecked(0);
-        }
+    }
+
+    private void reverseCheckState(Todo todo) {
+        // reverse check state in todo
+        if (todo.getChecked() == 0) {todo.setChecked(1);}
+        else {todo.setChecked(0);}
 
         // update db
         db.update(todo);
+    }
+
+    public void createTodo(View view) {
+        EditText editText = (EditText) findViewById(R.id.mainEditText);
+        db.create(new Todo(editText.getText().toString(), 0));
+
+        // clear textfield
+        editText.getText().clear();
+
+        // update list
+        updateList();
+    }
+
+    private void updateList() {
+        // get fresh data from db
+        todoList = db.read();
+        if (todoList.isEmpty()) {
+            init();
+        }
+        updateTodoStrList();
+
+        // update listview
+        arrayAdapter = new ArrayAdapter(getApplicationContext(),
+                android.R.layout.simple_list_item_multiple_choice, todoStrList);
+        lvMain.setAdapter(arrayAdapter);
+
+        // set check state of todo items
+        for (int i = 0; i < todoList.size(); i++) {
+            lvMain.setItemChecked(i, (todoList.get(i).getChecked() != 0));
+        }
+    }
+
+    private void init() {
+        // will only run when databse is empty
+        db.create(new Todo(getString(R.string.init1), 0));
+        db.create(new Todo(getString(R.string.init2), 0));
+        db.create(new Todo(getString(R.string.init3), 0));
     }
 
     private class simpleListener implements AdapterView.OnItemClickListener {
@@ -96,16 +125,29 @@ public class MainActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Log.d("log", "Main.simpleListener: start");
 
-            // get textview of todo
-            TextView tvTodo = (TextView) view.findViewById(R.id.listCheckedTV);
-
             // reverse checkstate of item in database
-            reverseCheckState(todoList.get(position), tvTodo);
+            reverseCheckState(todoList.get(position));
 
             // update view
             lvMain.setItemChecked(position, (todoList.get(position).getChecked() != 0));
 
             Log.d("log", "Main.simpleListener: success");
+        }
+    }
+
+    private class longListener implements AdapterView.OnItemLongClickListener {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            Log.d("log", "Main.longListener: start");
+
+            // delete item from database
+            db.delete(todoList.get(position));
+
+            // update list
+            updateList();
+
+            Log.d("log", "Main.longListener: success");
+            return true;
         }
     }
 }
